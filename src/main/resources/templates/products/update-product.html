@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+  <title>Update Product</title>
+
+  <style>
+    body {
+   font-family: 'Times New Roman', serif;
+}
+   .product-image {
+       max-width: 100%;
+       height: auto;
+       border-radius: 8px;
+       display: block;
+       margin: 0 auto;
+   }
+   .form-container {
+   background-color: #ffffff;
+   padding: 30px; /* Thêm khoảng cách padding cho không gian rộng hơn */
+   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+   border-radius: 8px;
+   margin-top: 20px;
+}
+   .form-label {
+       font-weight: bold;
+       color: #495057;
+   }
+   .btn-primary {
+       background-color: #343a40;
+       color: #ffffff;
+   }
+   .btn-primary:hover {
+       background-color: #495057;
+   }
+   input, textarea, select {
+        font-size: 18px !important;
+         padding: 12px; /* Thêm padding cho input, textarea để dễ sử dụng hơn */
+   margin-bottom: 15px; /* Thêm khoảng cách giữa các phần tử */
+    }
+    textarea.form-control {
+    min-height: calc(19.5em + .75rem + calc(var(--bs-border-width)* 2));
+}
+
+    input::placeholder, textarea::placeholder {
+        font-size: 18px !important;
+    }
+  </style>
+</head>
+<body>
+<section layout:fragment="content" class="container mt-5">
+  <div class="form-container">
+    <h1 class="text-center mb-4">Chỉnh sửa sản phẩm </h1>
+    <form th:action="@{/products/update/{id}(id=${product.id})}" th:object="${product}" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+      <div class="row">
+          <!-- Input file để chọn hình ảnh mới -->
+
+              <div class="mb-3">
+                  <label for="imageUpload" class="form-label">Chọn hình mới:</label>
+                  <input type="file" id="imageUpload" name="image" class="form-control" accept="image/*">
+              </div>
+
+        <div class="col-md-4 text-center">
+          <img th:src="${product.imgUrl}" alt="Product Image" class="product-image">
+        </div>
+
+        <div class="col-md-8">
+          <div class="row">
+            <div class="col-md-6">
+
+              <div class="mb-3">
+                <label for="name" class="form-label">Tên:</label>
+                <input type="text" th:field="*{name}" class="form-control" id="name" required>
+                <div class="text-danger" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+              </div>
+              <div class="mb-3">
+                <label for="price" class="form-label">Giá:</label>
+                <input type="text" th:field="*{price}" class="form-control" id="price" required>
+              </div>
+              <div class="mb-3">
+                <label for="category" class="form-label">Danh mục:</label>
+                <select th:field="*{category.id}" class="form-control" id="category">
+                  <option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}" th:selected="${category.id == product.category.id}"></option>
+                </select>
+              </div>
+
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="brand" class="form-label">Thương hiệu:</label>
+                <select th:field="*{brand.id}" class="form-control" id="brand">
+                  <option th:each="brand : ${brands}" th:value="${brand.id}" th:text="${brand.name}" th:selected="${brand.id == product.brand.id}"></option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="description" class="form-label">Mô tả:</label>
+                <textarea th:field="*{description}" class="form-control" id="description" required></textarea>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="d-grid gap-2 form-action mt-4">
+        <button type="submit" class="btn btn-primary">Lưu</button>
+        <a th:href="@{/products}" class="btn btn-link">Hủy</a>
+      </div>
+    </form>
+  </div>
+</section>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

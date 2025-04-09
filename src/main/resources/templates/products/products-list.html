@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:sec="http://www.w3.org/1999/xhtml"
+      layout:decorate="~{layout}">
+<head>
+    <title th:text="${title} ?: 'Danh sách sản phẩm'">Danh sách sản phẩm</title>
+
+    <style>
+        body {
+         font-family: 'Times New Roman', serif;
+            background-color: #ffffff;
+        }
+
+       h1 {
+           color: #0d5936  !important;
+           text-align: center;
+       }
+
+        /* Kiểu dáng cho sản phẩm */
+        .product-card {
+            position: relative;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            padding: 10px;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .product-image {
+            max-width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .product-info {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .product-info h5 {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .product-info p {
+            font-size: 1rem;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .product-actions {
+            display: none;
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            right: 10px;
+            text-align: center;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .product-card:hover .product-actions {
+            display: block;
+        }
+
+        .product-actions button,
+        .product-actions a {
+            margin: 0 5px;
+            font-size: 0.9rem;
+        }
+
+        .add-to-cart {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .add-to-cart form {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .add-to-cart input {
+            width: 60px;
+            text-align: center;
+        }
+
+        .product-price {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: red;
+        }
+
+        /* Kiểu dáng lưới */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .add-product-btn {
+            display: block;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<section layout:fragment="content" class="container mt-5">
+    <h1>Danh sách sản phẩm</h1>
+
+    <!-- Nút thêm sản phẩm -->
+    <div class="add-product-btn">
+        <a th:href="@{/products/add}" class="btn btn-primary" sec:authorize="hasAuthority('ADMIN')">Thêm sản phẩm</a>
+    </div>
+
+    <!-- Lưới sản phẩm -->
+    <div class="product-grid">
+        <div class="product-card" th:each="product : ${products}">
+            <img th:src="${product.imgUrl}" alt="Product Image" class="product-image">
+
+            <!-- Thông tin sản phẩm -->
+            <div class="product-info">
+                <h5 th:text="${product.name}"></h5>
+                <p class="product-price" th:text="${product.price} + ' VND'"></p>
+            </div>
+
+
+
+            <!-- Hiển thị trạng thái và các nút khi hover -->
+            <div class="product-actions">
+                <p>
+                    <span th:if="${product.isHidden}" class="text-danger">Ẩn</span>
+                    <span th:unless="${product.isHidden}" class="text-success">Hiện</span>
+                </p>
+                <div sec:authorize="hasAuthority('ADMIN')">
+                    <a th:href="@{/products/edit/{id}(id=${product.id})}" class="btn btn-success btn-sm">Sửa</a>
+                    <a th:href="@{/products/detail/{id}(id=${product.id})}" class="btn btn-info btn-sm">Chi tiết</a>
+                    <!-- Thay đổi từ <a> sang <form> cho nút Xóa -->
+                    <form th:action="@{/products/delete/{id}(id=${product.id})}" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-danger btn-sm"
+                                onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này không?');">
+                            Xóa
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

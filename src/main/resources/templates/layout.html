@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security5"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8">
+    <title>Perfume Luxury</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <style>
+        /* Tổng thể */
+      body {
+          font-family: 'Times New Roman', serif;
+           font-size: 18px;
+          background-color: #ffffff;
+      }
+    input, textarea, select {
+        font-size: 18px !important;
+    }
+
+    input::placeholder, textarea::placeholder {
+        font-size: 18px !important;
+    }
+
+      /* Thanh điều hướng */
+      .navbar {
+          background-color: #064C3E;
+          padding: 10px 20px;
+      }
+
+      .navbar-brand {
+          font-size: 28px;
+          font-weight: bold;
+          color: #FFFFFF !important; /* Màu trắng ưu tiên */
+          text-align: center;
+      }
+
+      .navbar-brand:hover {
+          color: #F0F0F0 !important;
+      }
+
+      .navbar-nav .nav-link,
+      .navbar-text,
+      .navbar-nav .bi {
+          color: #FFFFFF !important; /* Màu trắng cho tất cả chữ và icon */
+          font-size: 16px;
+      }
+
+      .navbar-nav .nav-link:hover,
+      .navbar-text:hover {
+          color: #E2E2E2 !important; /* Xám nhạt khi hover */
+      }
+
+      /* Form tìm kiếm */
+      .form-control {
+          border-radius: 4px;
+          font-size: 14px;
+      }
+
+      .btn-outline-light {
+          color: #FFFFFF !important;
+          border-color: #FFFFFF !important;
+          background: #01502b;
+      }
+
+      .btn-outline-light:hover {
+          background-color: #FFFFFF !important;
+          color: #064C3E !important;
+      }
+
+      /* Icon giỏ hàng và yêu thích */
+      .cart-icon {
+          position: relative;
+      }
+
+      .cart-icon .cart-count {
+          position: absolute;
+          top: -5px;
+          right: -10px;
+          background-color: #FF0000;
+          color: #FFFFFF !important; /* Màu trắng cho chữ trong icon giỏ hàng */
+          font-size: 12px;
+          font-weight: bold;
+          border-radius: 50%;
+          width: 20px;
+          height: 20px;
+          text-align: center;
+          line-height: 20px;
+      }
+         /* Tổng thể */
+    .outside-navbar {
+        background-color: #3a2d2d; /* Nền trắng */
+        padding: 10px 0; /* Khoảng cách trên dưới */
+        border-top: 1px solid #064C3E; /* Đường kẻ trên */
+        text-align: center; /* Canh giữa nội dung */
+    }
+
+    /* Kiểu chữ và màu sắc */
+    .nav-item-custom {
+        font-family: 'Arial', sans-serif;
+        font-weight: bold;
+        font-size: 14px; /* Kích thước chữ */
+        color: #000000; /* Màu chữ đen */
+        text-transform: uppercase; /* Chữ in hoa */
+        margin: 0 20px; /* Khoảng cách giữa các mục */
+        text-decoration: none; /* Xóa gạch chân */
+    }
+
+    /* Hiệu ứng hover */
+    .nav-item-custom:hover {
+        color: #064C3E; /* Màu xanh khi hover */
+        text-decoration: none; /* Xóa gạch chân khi hover */
+    }
+
+    /* Dropdown danh sách thương hiệu */
+#brandList {
+    display: none; /* Ban đầu ẩn */
+    position: absolute;
+    background-color: white;
+    border: 1px solid #ccc;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    width: 300px; /* Độ rộng của khung danh sách */
+    max-height: 300px; /* Chiều cao tối đa của khung danh sách */
+    overflow-y: auto; /* Hiện thanh cuộn khi nội dung quá dài */
+    padding: 10px;
+    border-radius: 5px; /* Bo tròn góc */
+}
+
+/* Các mục trong danh sách */
+#brandList .dropdown-item {
+    display: block;
+    width: 100%;
+    padding: 8px 15px; /* Khoảng cách chữ */
+    clear: both;
+    font-weight: 400;
+    color: #212529; /* Màu chữ */
+    text-align: inherit;
+    white-space: nowrap;
+    background-color: transparent;
+    border: 0;
+    cursor: pointer;
+    font-size: 18px; /* Kích thước chữ */
+}
+
+#brandList .dropdown-item:hover {
+    background-color: #f8f9fa; /* Màu nền khi hover */
+    color: #064C3E; /* Màu chữ xanh */
+}
+
+          /* Các icon liên hệ */
+        .fixed-contact-icons {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .contact-icon {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            background-color: #064C3E;
+            border-radius: 50%;
+            padding: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .contact-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .contact-icon:hover {
+            background-color: #01502b;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light">
+    <div class="container-fluid d-flex align-items-center justify-content-between">
+        <!-- Form tìm kiếm bên trái -->
+        <form class="d-flex" action="/products/search" method="get" style="width: 300px; margin-right: 20px;">
+            <input class="form-control me-2" type="search" placeholder="Tìm kiếm sản phẩm..." aria-label="Search" name="keyword">
+            <button class="btn btn-outline-light" type="submit" style="background: none">
+                <i class="bi bi-search"></i>
+            </button>
+        </form>
+
+        <!-- Logo ở giữa -->
+        <a class="navbar-brand mx-auto" style="color:white" href="/products">PARFUMER LUXURY</a>
+
+        <!-- Các icon và trạng thái người dùng bên phải -->
+        <ul class="navbar-nav d-flex align-items-center" style="color:white; margin-left: 20px;">
+            <!-- Hiển thị khi chưa đăng nhập -->
+            <!-- Hiển thị khi chưa đăng nhập -->
+            <li class="nav-item d-flex flex-column align-items-start me-3" sec:authorize="!isAuthenticated()">
+                <span class="navbar-text">Xin chào, Khách</span>
+                <div>
+                    <a class="btn btn-link text-white p-0" th:href="@{/login}" style="text-decoration: none; font-weight: bold;">Đăng nhập</a>
+                    <span>hoặc</span>
+                    <a class="btn btn-link text-white p-0" th:href="@{/register}" style="text-decoration: none; font-weight: bold; ">Đăng ký</a>
+                </div>
+            </li>
+
+            <!-- Hiển thị khi đã đăng nhập -->
+            <li class="nav-item d-flex flex-column align-items-start me-3" sec:authorize="isAuthenticated()">
+        <span class="navbar-text">
+            Xin chào, <span sec:authentication="name"></span>...
+        </span>
+                <div>
+                    <a class="btn btn-link text-white p-0" href="/profile" style="text-decoration: none; font-weight: bold;">Tài khoản</a>
+                    <span>hoặc</span>
+                    <form th:action="@{/logout}" method="post" style="display: inline;">
+                        <button class="btn btn-link text-white p-0" type="submit" style="text-decoration: none; font-weight: bold; background: none">Đăng xuất</button>
+                    </form>
+                </div>
+            </li>
+            <!-- Biểu tượng Yêu thích -->
+
+            <li class="nav-item me-2 cart-icon">
+                <a class="nav-link" th:href="@{/favorites}">
+                    <i class="bi bi-heart"></i>
+                    <span class="cart-count" th:text="${favoriteCount} ?: 0"></span>
+                </a>
+            </li>
+
+
+            <!-- Biểu tượng Giỏ hàng -->
+            <li class="nav-item cart-icon">
+                <a class="nav-link" th:href="@{/cart}">
+                    <i class="bi bi-cart"></i>
+            </a>
+            </li>
+
+        </ul>
+    </div>
+</nav>
+
+
+<!-- Các mục ngoài thanh điều hướng -->
+<div class="outside-navbar">
+    <ul class="navbar-nav d-flex justify-content-center flex-row">
+        <li class="nav-item">
+            <a class="nav-link nav-item-custom" aria-current="page" href="/products">TRANG CHỦ</a>
+        </li>
+        <li class="nav-item" sec:authorize="!hasAuthority('ADMIN')">
+            <a class="nav-link nav-item-custom" href="/products/category/1">NƯỚC HOA NAM</a>
+        </li>
+        <li class="nav-item" sec:authorize="!hasAuthority('ADMIN')">
+            <a class="nav-link nav-item-custom" href="/products/category/5">NƯỚC HOA NỮ</a>
+        </li>
+        <li class="nav-item dropdown" sec:authorize="!hasAuthority('ADMIN')">
+            <a class="nav-link nav-item-custom dropdown-toggle" href="#" id="brandDropdown" role="button" aria-expanded="false">
+                THƯƠNG HIỆU
+            </a>
+            <div class="dropdown-menu" aria-labelledby="brandDropdown" id="brandList">
+                <!-- Danh sách thương hiệu sẽ được thêm vào đây bằng JavaScript -->
+            </div>
+            <!-- Thêm mục Liên Hệ -->
+
+        </li>
+        <li class="nav-item">
+            <a class="nav-link nav-item-custom" href="/contact">LIÊN HỆ</a>
+        </li>
+
+        <!-- Các mục dành cho ADMIN -->
+        <li class="nav-item" sec:authorize="hasAnyAuthority('ADMIN')">
+            <a th:href="@{/brands}" class="nav-link nav-item-custom">QUẢN LÝ THƯƠNG HIỆU</a>
+        </li>
+        <li class="nav-item" sec:authorize="hasAnyAuthority('ADMIN')">
+            <a th:href="@{/products/products-list}" class="nav-link nav-item-custom">QUẢN LÝ SẢN PHẨM</a>
+        </li>
+        <li class="nav-item" sec:authorize="hasAnyAuthority('ADMIN')">
+            <a th:href="@{/categories}" class="nav-link nav-item-custom">QUẢN LÝ DANH MỤC</a>
+        </li>
+        <!-- Thêm liên kết Quản lý đơn hàng -->
+        <li class="nav-item" sec:authorize="hasAnyAuthority('ADMIN')">
+            <a th:href="@{/admin/orders}" class="nav-link nav-item-custom">QUẢN LÝ ĐƠN HÀNG</a>
+        </li>
+        <li class="nav-item" sec:authorize="hasAnyAuthority('ADMIN')">
+            <a th:href="@{/admin/reviews}" class="nav-link nav-item-custom">QUẢN LÝ ĐÁNH GIÁ</a>
+        </li>
+
+    </ul>
+</div>
+
+<!-- Các nút liên hệ Zalo và Facebook -->
+<div class="fixed-contact-icons">
+    <!-- Zalo Icon -->
+    <a href="https://zalo.me/0795020563" target="_blank" class="contact-icon zalo-icon" title="Liên hệ qua Zalo">
+        <img src="/images/Logo-Zalo-App-Rec.webp" alt="Zalo Icon">
+    </a>
+    <!-- Messenger Icon -->
+    <a href="https://www.facebook.com/messages/t/100027789159429" target="_blank" class="contact-icon facebook-icon" title="Nhắn tin qua Messenger">
+        <img src="/images/messenger.webp" alt="Messenger Icon">
+    </a>
+</div>
+
+
+
+
+
+<div class="container mt-5">
+    <section layout:fragment="content">
+        <!-- Nội dung cụ thể của từng trang sẽ được đặt tại đây -->
+    </section>
+</div>
+<footer class="desktop-footer">
+    <div class="container" style="/*max-width: 1200px;margin: 0 auto;*/">
+        <div class="main-footer-grid">
+            <div class="website-links">
+                <h3>Perfume Luxury</h3>
+                <ul>
+                    <li>
+                        <a href="/pages/about-us">Giới thiệu</a>
+                    </li>
+                    <li>
+                        <a href="/pages/lien-he">Liên hệ</a>
+                    </li>
+                    <li>
+                        <a href="/pages/tuyen-dung">Tuyển dụng</a>
+                    </li>
+                </ul>
+                <div class="languages" style="margin-top: 40px;">
+                    <h3>Ngôn ngữ</h3>
+                    <div>
+                        <img src="//theme.hstatic.net/1000340570/1000964732/14/united-states.svg?v=5652" width="16" alt="united states">
+                        Tiếng Anh
+                    </div>
+                    <div>
+                        <img src="//theme.hstatic.net/1000340570/1000964732/14/vietnam.svg?v=5652" width="16" alt="vietnam">
+                        Tiếng Việt
+                    </div>
+                </div>
+            </div>
+            <div class="website-links">
+                <h3>Hỗ trợ</h3>
+                <ul>
+                    <li>
+                        <a href="/pages/cau-hoi-thuong-gap">Các câu hỏi thường gặp</a>
+                    </li>
+                    <li>
+                        <a href="/pages/cach-thuc-mua-hang">Cách thức mua hàng</a>
+                    </li>
+                    <li>
+                        <a href="/pages/huong-dan-dat-hang">Hướng dẫn đặt hàng</a>
+                    </li>
+                    <li>
+                        <a href="/pages/phuong-thuc-van-chuyen">Phương thức vận chuyển</a>
+                    </li>
+                    <li>
+                        <a href="/pages/phuong-thuc-thanh-toan">Phương thức thanh toán</a>
+                    </li>
+                    <li>
+                        <a href="#">Theo dõi đơn hàng</a>
+                    </li>
+                    <li>
+                        <a href="https://namperfume.net/pages/chinh-sach-gia-ca">Chính sách giá cả</a>
+                    </li>
+                    <li>
+                        <a href="https://namperfume.net/pages/chinh-sach-doi-tra">Chính sách đổi trả</a>
+                    </li>
+                    <li>
+                        <a href="https://namperfume.net/pages/chinh-sach-bao-mat">Chính sách bảo mật</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="stores-address">
+                <h3>Địa chỉ cửa hàng</h3>
+                <p>123, Phường 14, QUẬN 9, <br>TP. HỒ CHÍ MINH</p>
+                <p>64 đường số 5 Linh Xuân Thủ Đức, <br>TP. Hồ Chí Minh</p>
+
+
+            </div>
+            <div class="languages">
+                <h3>Theo dõi chúng tôi</h3>
+                <div>
+                    <a href="https://www.instagram.com/namperfumee" target="_blank">
+                        <img src="//theme.hstatic.net/1000340570/1000964732/14/icon-insta.svg?v=5652" width="16" alt="insta">
+                        Instagram
+                    </a>
+                </div>
+                <div>
+                    <a href="https://www.facebook.com/namperfumee" target="_blank">
+                        <img src="//theme.hstatic.net/1000340570/1000964732/14/icon-facebook.svg?v=5652" width="16" alt="facebook">
+                        Facebook
+                    </a>
+                </div>
+                <div>
+                    <a href="https://www.youtube.com/@namperfumeTV" target="_blank">
+                        <img src="//theme.hstatic.net/1000340570/1000964732/14/icon-youtube.svg?v=5652" width="16" alt="youtube">
+                        Youtube
+                    </a>
+                </div>
+                <div>
+                    <a href="https://www.tiktok.com/@namperfume.net" target="_blank">
+                        <img src="//theme.hstatic.net/1000340570/1000964732/14/icon-tiktok.svg?v=5652" width="16" alt="tiktok">
+                        Tiktok
+                    </a>
+                </div>
+            </div>
+            <div class="contact">
+                <h2>Nơi mùi hương là <br>bạn đồng hành</h2>
+                <h4>Đăng ký thông báo và nhận tin</h4>
+                <div class="email-subscription">
+                    <input required="" type="email" value="" placeholder="Nhập email của bạn" name="contact[email]" aria-label="Email Address">
+                    <button type="submit">Gửi</button>
+                </div>
+
+            </div>
+        </div>
+
+
+    </div>
+    <style>
+        .desktop-footer {
+            background-color: #3A393A;
+            color: #F7F7F7;
+            /* padding: 2.5rem 1rem; */
+            padding: 40px 0 30px;
+        }
+        .desktop-footer .contact {
+            min-width: 275px;
+        }
+        .desktop-footer .contact h4 {
+            color: #D8D7D8;
+            margin-top: 40px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            font-weight: 700;
+        }
+        .desktop-footer .contact p {
+            line-height: 14px;
+        }
+        .desktop-footer .copyright{
+            font-weight: 400;
+            font-size: 12px;
+            line-height: 15px;
+            color: #898889;
+        }
+        .desktop-footer h3 {
+            color: #D8D7D8;
+            margin-bottom: 20px;
+            font-size: 14px;
+            font-weight: 700;
+        }
+        .desktop-footer h2 {
+            font-family: 'Noto Serif Display';
+            font-style: normal;
+            font-weight: 400;
+            font-size: 30px;
+            line-height: 41px;
+            color: #D8D7D8;
+            margin-bottom: 2rem;
+        }
+        .desktop-footer .languages a {
+            color: #fff;
+        }
+        .main-footer-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        .social-media a {
+            display: inline-block;
+            margin-right: 1rem;
+        }
+        .copyright p {
+            margin: 0;
+        }
+        .footer-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .separator {
+            margin: 2.5rem 0;
+            width: 100%;
+            height: 0.5px;
+            background-color: #898889;
+        }
+        .website-links a{
+            color: #F7F7F7;
+            display: block;
+            margin-bottom: 7px;
+        }
+        .languages div {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .languages img {
+            margin-right: 6px;
+        }
+        .stores-address p {
+            line-height: 1.4;
+            margin-bottom: 7px;
+        }
+        input[type="email"] {
+            background-color: transparent;
+            border: 1px solid #898889;
+            flex-grow: 1;
+            margin-right: 10px;
+            padding: 0 10px;
+            border-radius: 4px;
+        }
+        button[type="submit"] {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #FFFFFF;
+            border-radius: 4px;
+            color: #3a393a;
+            padding: 8px 16px;
+            text-transform: uppercase;
+            border: none;
+        }
+        .email-subscription {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+        #footMenuCountWishlist {
+          position: absolute;
+          color: #fff;
+          font-size: 8px;
+          left: auto;
+          top: 8px;
+          right: -2px;
+          background: #d72229;
+          font-weight: 700;
+          height: 15px;
+          line-height: 15px;
+          width: 15px;
+          border-radius: 50%;
+          display: inline-block;
+          text-align: center;
+        }
+        .menu-footer-mobile .footer-menu-item a:focus { color: #3a393a; }
+        .menu-footer-mobile .footer-menu-item a:hover { color: #3a393a; }
+        .menu-footer-mobile .footer-menu-item.active span { color: #d72229; }
+        .menu-footer-mobile .footer-menu-item.open span { color: #d72229; }
+        .menu-footer-mobile .footer-menu-item.active.closeoff span { color: #3a393a; }
+        .menu-footer-mobile ul li figure { position: relative; }
+
+        .footer-mobile {
+            background: #3A393A;
+            display: none;
+            padding-bottom: 10px;
+            font-size: 12px;
+            color: #D8D7D8;
+            position: relative;
+        }
+
+        .menu-accodion {
+
+        }
+
+        .menu-accodion .title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #D8D7D8;
+            font-size: 12px;
+            font-weight: 700;
+            height: 52px;
+                border-bottom: 1px solid rgba(137, 136, 137, 0.5);
+            margin: 0 15px;
+        }
+
+        .menu-accodion .toggle {
+            background: #F7F7F7;
+        }
+
+        .menu-accodion .toggle .title {
+            color: #3A393A;
+        }
+
+        .menu-accodion .title .text-collapse img {
+            filter: invert(95%) sepia(2%) saturate(70%) hue-rotate(251deg) brightness(91%) contrast(93%);
+            width:20px;
+        }
+
+        .menu-accodion .title.icon-right .text-collapse img {
+            transform: rotate(-90deg);
+        }
+
+        .menu-accodion .toggle .title img {
+            transform: rotate(0);
+        }
+
+        .menu-accodion .text {
+            display: none;
+            background: #F7F7F7;
+            padding: 0 15px;
+        }
+
+        .menu-accodion .text ul li {
+            height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 12px;
+            padding-left: 15px;
+            border-bottom: 1px solid #D8D7D8;
+        }
+
+        .menu-accodion .text ul li a {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .menu-accodion .text ul li img {
+            transform: rotate(-90deg);
+            width:20px;
+        }
+
+        .footer-mobile .social-media {
+            padding: 20px 15px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .footer-mobile .social-media a {
+            display: flex;
+            align-items: center;
+            color: #D8D7D8;
+        }
+
+        .footer-mobile .social-media img {
+            width: 16px;
+            margin-right: 4px;
+        }
+
+        .footer-mobile .contact {
+            padding: 20px 15px;
+        }
+
+        .footer-mobile .sologan-namperfume {
+            padding: 20px 15px;
+        }
+
+        .footer-mobile .sologan-namperfume h2 {
+            font-size: 24px;
+            font-weight: 400;
+            color: #D8D7D8;
+            font-family: 'Noto Serif Display' !important;
+            margin-bottom: 20px;
+        }
+
+        .footer-mobile .copyright {
+            padding: 20px 15px;
+        }
+
+        .footer-mobile .contact a {
+            color: #D8D7D8;
+        }
+
+        .footer-mobile .contact input[type="email"] {
+            border: 1px solid #D8D7D8;
+            padding: 0 5px;
+            border-radius: 4px;
+        }
+
+        .footer-mobile .contact button[type="submit"] {
+            background: #D8D7D8;
+        }
+
+        .footer-mobile .copyright {
+            color: #898889;
+        }
+
+        .tel-a-classing:hover { color:#fff; }
+        @media screen and (max-width: 767px) {
+            .main-footer-grid > div {
+                width: 100%;
+            }
+            .desktop-footer {
+                display: none;
+            }
+            .highlight-item h3 {
+                font-size: 10px;
+                text-align: center;
+            }
+            .stores-address br {
+                display: none;
+            }
+
+            .footer-mobile {
+                display: block;
+            }
+        }
+
+    </style>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/brand-dropdown.js"></script> <!-- Nhúng tệp JavaScript -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+     const brandDropdown = document.getElementById("brandDropdown");
+     const brandList = document.getElementById("brandList");
+
+     if (brandDropdown && brandList) {
+         brandDropdown.addEventListener("click", function (event) {
+             event.preventDefault(); // Ngăn hành vi mặc định của liên kết
+             if (brandList.style.display === "none" || brandList.style.display === "") {
+                 fetch("/api/brands") // Gọi API để lấy danh sách thương hiệu
+                     .then((response) => response.json())
+                     .then((data) => {
+                         let brandsHtml = ""; // Làm trống danh sách cũ
+                         data.forEach((brand) => {
+                             brandsHtml += `<a class="dropdown-item" href="/products/brand/${brand.id}">${brand.name}</a>`;
+                         });
+                         brandList.innerHTML = brandsHtml; // Đổ dữ liệu vào danh sách
+                         brandList.style.display = "block"; // Hiển thị danh sách
+                     })
+                     .catch((error) => console.error("Error fetching brands:", error));
+             } else {
+                 brandList.style.display = "none"; // Ẩn danh sách nếu đang hiển thị
+             }
+         });
+
+         // Ẩn danh sách nếu click ra ngoài
+         document.addEventListener("click", function (event) {
+             if (!brandDropdown.contains(event.target) && !brandList.contains(event.target)) {
+                 brandList.style.display = "none";
+             }
+         });
+     } else {
+         console.warn("Brand dropdown or brand list not found in the DOM.");
+     }
+ });
+
+
+</script>
+</body>
+</html>

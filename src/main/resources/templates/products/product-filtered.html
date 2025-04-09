@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+
+<head>
+    <title>Danh sách sản phẩm đã lọc</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <style>
+        body {
+    font-family: 'Times New Roman', serif;
+}
+        .filter-section {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+
+        .product-listing .card {
+            width: 100%;
+            margin-bottom: 20px;
+            transition: transform 0.2s;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .product-listing .card:hover {
+            transform: scale(1.05);
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .product-listing .card-img-top {
+            height: 150px;
+            object-fit: contain;
+        }
+
+        .product-listing .card-price {
+            color: red;
+            font-weight: bold;
+        }
+
+        .action-icons {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            display: flex;
+            gap: 10px;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .card:hover .action-icons {
+            opacity: 1;
+        }
+
+        .action-icons button {
+            background: rgba(0, 0, 0, 0.6);
+            border: none;
+            color: white;
+            border-radius: 50%;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .action-icons button:hover {
+            transform: scale(1.2);
+        }
+
+        .card {
+            position: relative;
+        }
+    </style>
+</head>
+
+<body>
+<section layout:fragment="content" class="container mt-5">
+    <!-- Form lọc -->
+    <div class="row">
+        <div class="col-md-3">
+            <div class="filter-section">
+                <h5>Lọc sản phẩm</h5>
+                <form action="/products/filter" method="get">
+                    <div class="mb-3">
+                        <label for="price" class="form-label">Giá:</label>
+                        <input type="number" id="price" name="price" class="form-control" placeholder="Nhập giá"
+                               th:value="${param.price}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="comparisonType" class="form-label">So sánh giá:</label>
+                        <select id="comparisonType" name="comparisonType" class="form-select">
+                            <option value="greater" th:selected="${param.comparisonType == 'greater'}">Lớn hơn</option>
+                            <option value="equal" th:selected="${param.comparisonType == 'equal'}">Bằng</option>
+                            <option value="less" th:selected="${param.comparisonType == 'less'}">Nhỏ hơn</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Thương hiệu:</label>
+                        <div th:each="brand : ${allBrands}">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" th:id="${'brand-' + brand.id}"
+                                       th:name="brandNames" th:value="${brand.name}"
+                                       th:checked="${param.brandNames != null and param.brandNames.contains(brand.name)}">
+                                <label class="form-check-label" th:for="${'brand-' + brand.id}" th:text="${brand.name}">Brand</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Danh mục:</label>
+                        <div th:each="category : ${allCategories}">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" th:id="${'category-' + category.id}"
+                                       th:name="categoryNames" th:value="${category.name}"
+                                       th:checked="${param.categoryNames != null and param.categoryNames.contains(category.name)}">
+                                <label class="form-check-label" th:for="${'category-' + category.id}" th:text="${category.name}">Category</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Lọc sản phẩm</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Danh sách sản phẩm -->
+        <div class="col-md-9">
+            <!-- Hiển thị thông báo nếu không có sản phẩm -->
+            <div th:if="${filteredProducts.isEmpty()}" class="alert alert-warning text-center">
+                Không có sản phẩm nào phù hợp với bộ lọc.
+            </div>
+            <div class="row row-cols-1 row-cols-md-4 g-4 product-listing">
+                <div class="col" th:each="product : ${filteredProducts}" th:unless="${filteredProducts.isEmpty()}">
+                    <div class="card shadow-sm">
+                        <img th:src="${product.imgUrl}" class="card-img-top" alt="Product Image">
+                        <div class="action-icons">
+                            <form th:action="@{/favorites/add}" method="post" style="display: inline;">
+                                <input type="hidden" th:value="${product.id}" name="productId">
+                                <button type="submit">
+                                    <i class="bi bi-heart"></i>
+                                </button>
+                            </form>
+                            <form th:action="@{/cart/add}" method="post" style="display: inline;">
+                                <input type="hidden" th:value="${product.id}" name="productId">
+                                <button type="submit">
+                                    <i class="bi bi-cart"></i>
+                                </button>
+                            </form>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title" th:text="${product.name}">Tên sản phẩm</h5>
+                            <p class="card-brand" th:text="'Thương hiệu: ' + ${product.brand.name}">Thương hiệu: Unknown</p>
+
+                            <p class="card-price" th:text="'Giá: ' + ${product.price} + ' VND'">Giá: 0 VND</p>
+                        </div>
+                        <div class="card-footer text-center">
+                            <a th:href="@{/products/detail/{id}(id=${product.id})}" class="btn btn-primary btn-sm">Xem chi tiết</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

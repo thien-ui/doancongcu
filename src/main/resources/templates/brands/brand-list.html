@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:sec="http://www.w3.org/1999/xhtml"
+      layout:decorate="~{layout}">
+<head>
+    <title th:text="${title} ?: 'Danh sách thương hiệu'">Danh sách thương hiệu</title>
+
+    <style>
+        h1 {
+          color: #0d5936  !important;
+          text-align: center;
+      }
+        body {
+           font-family: 'Times New Roman', serif;
+       }
+       .brand-card {
+           position: relative;
+           text-align: center;
+           border: 1px solid #ddd;
+           padding: 10px;
+           margin: 10px;
+           border-radius: 8px;
+           display: flex;
+           flex-direction: column;
+           justify-content: space-between;
+           height: 350px; /* Set fixed height for uniform card size */
+       }
+       .brand-card img {
+           width: 100%;
+           height: 200px; /* Ensure all images are the same height */
+           object-fit: cover; /* Maintain aspect ratio while covering the area */
+           border-radius: 8px;
+       }
+       .brand-card:hover .action-buttons {
+           opacity: 1;
+       }
+       .action-buttons {
+           position: absolute;
+           top: 50%;
+           left: 50%;
+           transform: translate(-50%, -50%);
+           opacity: 0;
+           transition: opacity 0.3s ease;
+       }
+       .action-buttons a {
+           margin: 5px;
+       }
+       .brand-card h5 {
+           margin-top: 10px;
+           font-size: 1.1rem;
+       }
+    </style>
+</head>
+<body>
+<section layout:fragment="content">
+    <h1>Danh sách thương hiệu</h1>
+
+    <!-- Hiển thị thông báo nếu có -->
+    <div th:if="${message}" class="alert alert-success" role="alert" th:text="${message}"></div>
+
+    <div>
+        <a th:href="@{/brands/add}" class="btn btn-primary mb-3" sec:authorize="hasAuthority('ADMIN')">Thêm thương hiệu mới</a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3" th:each="brand : ${brands}">
+            <div class="brand-card">
+                <img th:src="${brand.imgUrl}" alt="Brand Image">
+                <div class="action-buttons">
+                    <div sec:authorize="hasAuthority('ADMIN')">
+                        <a th:href="@{/brands/edit/{id}(id=${brand.id})}" class="btn btn-success btn-sm">Sửa</a>
+                        <a th:href="@{/brands/delete/{id}(id=${brand.id})}"
+                           class="btn btn-danger btn-sm" onclick="return confirm('Bạn có chắc chắn muốn xóa?')">Xóa</a>
+                        <a th:href="@{/brands/restore/{id}(id=${brand.id})}"
+                           class="btn btn-warning btn-sm" onclick="return confirm('Bạn có chắc chắn muốn khôi phục thương hiệu này?')">Khôi phục</a>
+                    </div>
+                </div>
+                <h5 th:text="${brand.name}"></h5>
+
+                <!-- Thêm nút "Xem Sản Phẩm" -->
+                <a th:href="@{/products/brand/{brandId}(brandId=${brand.id})}" class="btn btn-info btn-sm mt-2">Xem Sản Phẩm</a>
+            </div>
+        </div>
+    </div>
+</section>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+  <title th:text="${title} ?: 'Giỏ hàng'">Giỏ hàng</title>
+
+  <style>
+    body {
+       font-family: 'Times New Roman', serif;
+    }
+    .alert {
+        margin-top: 20px;
+    }
+    .btn-group {
+        margin-top: 10px;
+    }
+    .cart-item {
+        border-bottom: 1px solid #ddd;
+        padding: 10px 0;
+    }
+    .product-image {
+        max-width: 100px;
+        margin-right: 20px;
+    }
+    .continue-shopping {
+        margin-top: 20px;
+        background-color: red;
+        margin-right: 10px;
+    }
+    .text-red {
+        color: red;
+    }
+    .btn-disabled {
+        pointer-events: none;
+        opacity: 0.5;
+    }
+  </style>
+</head>
+<body>
+<section layout:fragment="content" class="container mt-3">
+  <!-- Success and Error Alerts -->
+  <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+  <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+  <div class="row">
+    <div class="col-12">
+      <h1 class="text-red">Giỏ hàng</h1>
+      <div th:if="${cartItems.isEmpty()}" class="alert alert-info">
+        Giỏ hàng của bạn đang trống. Hãy thêm sản phẩm vào giỏ hàng để tiếp tục mua sắm.
+      </div>
+
+      <div th:unless="${cartItems.isEmpty()}">
+        <div th:each="item : ${cartItems}" class="cart-item row">
+          <div class="col-md-3">
+            <img th:src="${item.product.imgUrl}" class="img-fluid product-image" alt="Hình ảnh sản phẩm">
+          </div>
+          <div class="col-md-6">
+            <h5 th:text="${item.product.name}">Tên sản phẩm</h5>
+            <p th:text="'Giá: $' + ${item.product.price}">Giá: $0.00</p>
+            <p>Số lượng: <span th:text="${item.quantity}"></span></p>
+          </div>
+          <div class="col-md-3 text-end">
+            <form th:action="@{/cart/remove}" method="post" style="display: inline;">
+              <input type="hidden" th:value="${item.id}" name="cartItemId">
+              <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Thanh toán và xóa giỏ hàng -->
+      <div class="btn-group">
+        <a th:href="@{/cart/clear}" class="btn btn-secondary">Xóa tất cả</a>
+        <!-- Disable thanh toán nếu giỏ hàng trống -->
+        <a th:href="@{/order/checkout}" class="btn btn-primary"
+           th:classappend="${cartItems.isEmpty()} ? ' btn-disabled' : ''">Thanh toán</a>
+      </div>
+
+      <div class="mt-3">
+        <h5>Tổng cộng: <span th:text="${total} + 'VND '"></span></h5>
+      </div>
+
+      <a th:href="@{/products}" class="btn btn-danger continue-shopping">Tiếp tục mua sắm</a>
+    </div>
+  </div>
+</section>
+</body>
+</html>
