@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:sec="http://www.w3.org/1999/xhtml"
+      layout:decorate="~{layout}">
+<head>
+  <title th:text="${title} ?: 'Danh sách danh mục'">Danh sách danh mục</title>
+
+  <style>
+    h1 {
+         color: #0d5936  !important;
+         text-align: center;
+     }
+  body {
+      font-family: 'Times New Roman', serif;
+  }
+  .category-card {
+      position: relative;
+      text-align: center;
+      border: 1px solid #ddd;
+      padding: 10px;
+      margin: 10px;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 350px; /* Set fixed height for uniform card size */
+  }
+  .category-card img {
+      width: 100%;
+      height: 250px; /* Ensure all images are the same height */
+      object-fit: cover; /* Maintain aspect ratio while covering the area */
+      border-radius: 8px;
+  }
+  .category-card:hover .action-buttons {
+      opacity: 1;
+  }
+  .action-buttons {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+  }
+  .action-buttons a {
+      margin: 5px;
+  }
+  .category-card h5 {
+      margin-top: 10px;
+      font-size: 1.1rem;
+  }
+  </style>
+</head>
+<body>
+<section layout:fragment="content">
+  <h1>Danh sách Danh Mục</h1>
+
+  <!-- Hiển thị thông báo nếu có -->
+  <div th:if="${message}" class="alert alert-success" role="alert" th:text="${message}"></div>
+
+  <div>
+    <a th:href="@{/categories/add}" class="btn btn-primary mb-3" sec:authorize="hasAuthority('ADMIN')">Thêm danh mục mới</a>
+  </div>
+
+  <div class="row">
+    <!-- Đổi từ col-md-3 sang col-md-6 để chiếm 50% chiều rộng của màn hình -->
+    <div class="col-md-6" th:each="category : ${categories}">
+      <div class="category-card">
+        <img th:src="${category.imgUrl}" alt="Category Image">
+        <div class="action-buttons">
+          <div sec:authorize="hasAuthority('ADMIN')">
+            <a th:href="@{/categories/edit/{id}(id=${category.id})}" class="btn btn-success btn-sm">Sửa</a>
+            <a th:href="@{/categories/delete/{id}(id=${category.id})}"
+               class="btn btn-danger btn-sm" onclick="return confirm('Bạn có chắc chắn muốn xóa?')">Xóa</a>
+            <a th:href="@{/categories/restore/{id}(id=${category.id})}"
+               class="btn btn-warning btn-sm" onclick="return confirm('Bạn có chắc chắn muốn khôi phục danh mục này?')">Khôi phục</a>
+          </div>
+        </div>
+        <h5 th:text="${category.name}"></h5>
+        <!-- Thêm nút "Xem Sản Phẩm" với đường dẫn đúng -->
+        <a th:href="@{/products/category/{categoryId}(categoryId=${category.id})}" class="btn btn-info btn-sm mt-2">
+          Xem Sản Phẩm
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+</body>
+</html>

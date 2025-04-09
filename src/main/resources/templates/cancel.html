@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thanh toán thất bại</title>
+    <link rel="stylesheet" href="" th:href="@{/css/style.css}">
+
+    <style>
+        body {
+   font-family: 'Times New Roman', serif;
+}
+    </style>
+</head>
+<body>
+<section layout:fragment="content" class="container text-center mt-5">
+    <div class="main-box">
+        <h4 class="text-danger">Thanh toán thất bại</h4>
+        <p>Nếu có bất kỳ câu hỏi nào, hãy gửi email tới
+            <a href="mailto:support@payos.vn" class="text-decoration-none">support@payos.vn</a>
+        </p>
+        <a href="/" id="return-page-btn" class="btn btn-primary mt-3">Trở về trang Tạo Link thanh toán</a>
+    </div>
+</section>
+<script src="script.js"></script>
+</body>
+</html>

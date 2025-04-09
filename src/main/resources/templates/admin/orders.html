@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.w3.org/1999/xhtml"
+      layout:decorate="~{layout.html}">
+<head>
+    <title>Quản lý Đơn hàng</title>
+
+
+    <style>
+        .title-red {
+          color: #0d5936  !important;
+          text-align: center;
+      }
+      body {
+ font-family: 'Times New Roman', serif;
+}
+    </style>
+</head>
+<body>
+<section layout:fragment="content">
+    <div class="container mt-5">
+        <h1 class="title-red">Danh sách đơn hàng</h1>
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tên Khách Hàng</th>
+                    <th>Số Điện Thoại</th>
+                    <th>Địa Chỉ</th>
+                    <th>Trạng Thái</th>
+                    <th>Tổng Tiền</th>
+                    <th>Ngày Tạo</th>
+                    <th>Thao Tác</th>
+                </tr>
+                </thead>
+                <tbody>
+                <!-- Nếu danh sách đơn hàng trống -->
+                <tr th:if="${orders.isEmpty()}">
+                    <td colspan="8" class="text-center">Không có đơn hàng nào.</td>
+                </tr>
+                <!-- Hiển thị danh sách đơn hàng -->
+                <tr th:each="order : ${orders}">
+                    <td th:text="${order.id}"></td>
+                    <td th:text="${order.customerName}"></td>
+                    <td th:text="${order.phone}"></td>
+                    <td th:text="${order.address}"></td>
+                    <td>
+                        <form th:action="@{/admin/orders/{id}/update-status(id=${order.id})}" method="post">
+                            <select name="status" class="form-select form-select-sm">
+                                <option value="PENDING" th:selected="${order.status == 'PENDING'}">Đang xử lý</option>
+                                <option value="PAID" th:selected="${order.status == 'PAID'}">Đã thanh toán</option>
+                                <option value="DELIVERED" th:selected="${order.status == 'DELIVERED'}">Đã giao hàng</option>
+                                <option value="CANCELLED" th:selected="${order.status == 'CANCELLED'}">Đã hủy</option>
+                            </select>
+                            <button type="submit" class="btn btn-sm btn-success mt-1">Lưu</button>
+                        </form>
+                    </td>
+                    <td th:text="${order.amount} + ' VNĐ'"></td>
+                    <td th:text="${#dates.format(order.createdDate, 'dd/MM/yyyy HH:mm')}"></td>
+                    <td>
+                        <a th:href="@{/admin/orders/{id}/details(id=${order.id})}" class="btn btn-primary btn-sm">Chi tiết</a>
+                        <form th:action="@{/admin/orders/{id}/delete(id=${order.id})}" method="post" style="display:inline;">
+                            <button type="submit" class="btn btn-danger btn-sm"
+                                    onclick="return confirm('Bạn có chắc chắn muốn xóa đơn hàng này không?');">
+                                Xóa
+                            </button>
+                        </form>
+                    </td>
+
+
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+
+</body>
+</html>

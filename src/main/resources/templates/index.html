@@ -1,0 +1,33 @@
+<!--<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tạo Link thanh toán</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        /* Thêm style cho trang */
+    </style>
+</head>
+<body>
+<div class="main-box">
+    <div class="checkout">
+        <h3>Xác nhận thanh toán</h3>
+        <div th:each="item : ${cartItems}">
+            <p><strong>Tên sản phẩm:</strong> <span th:text="${item.product.name}"></span></p>
+            <p><strong>Giá tiền:</strong> <span th:text="${item.product.price}"></span></p>
+            <p><strong>Số lượng:</strong> <span th:text="${item.quantity}"></span></p>
+        </div>
+        <h4>Tổng cộng: <span th:text="${total}"></span></h4>
+
+        Nút tạo link thanh toán
+        <form th:action="@{/create-payment-link}" method="post">
+            <input type="hidden" name="productIds" th:value="${cartItems.stream().map(item -> item.product.id).collect(TCollectors.toList())}" />
+            <input type="hidden" name="quantities" th:value="${cartItems.stream().map(item -> item.quantity).collect(TCollectors.toList())}" />
+            <button type="submit" id="create-payment-link-btn">Tạo Link Thanh Toán</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>
+-->

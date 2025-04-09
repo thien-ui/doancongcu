@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+  <title th:text="${title} ?: 'Đặt hàng'">Đặt hàng</title>
+
+  <style>
+    body {
+   font-family: 'Times New Roman', serif;
+}
+   .form-container {
+       max-width: 500px;
+       margin: 0 auto;
+       padding: 2rem;
+       background-color: #f8f9fa;
+       border-radius: 10px;
+       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+   }
+
+   .submit-btn {
+       margin-top: 20px;
+       width: 100%;
+       background-color: #007bff;
+       border-color: #007bff;
+   }
+
+   .submit-btn:hover {
+       background-color: #0056b3;
+       border-color: #0056b3;
+   }
+
+   h1 {
+       color: #dc3545;
+       text-align: center;
+       margin-bottom: 1.5rem;
+   }
+
+   .form-label {
+       font-weight: bold;
+       color: #333;
+   }
+
+   .form-control {
+       color: #333;
+   }
+  </style>
+</head>
+<body>
+<section layout:fragment="content" class="container mt-5">
+  <div class="form-container">
+    <h1>Thanh toán</h1>
+    <div class="mb-3">
+      <h5>Đơn hàng:</h5>
+      <div th:if="${cartItems.isEmpty()}" class="alert alert-info">Giỏ hàng của bạn đang trống.</div>
+      <div th:unless="${cartItems.isEmpty()}">
+        <div th:each="item : ${cartItems}" class="cart-item row">
+          <div class="col-md-3">
+            <img th:src="${item.product.imgUrl}" class="img-fluid product-image" alt="Product Image">
+          </div>
+          <div class="col-md-6">
+            <h6 th:text="${item.product.name}">Tên sản phẩm</h6>
+            <p th:text="'Giá: $' + ${item.product.price}">Giá: $0.00</p>
+            <p>Số lượng: <span th:text="${item.quantity}"></span></p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+    <hr>
+
+    <!-- Các trường thông tin chỉ cần hiển thị một lần -->
+
+
+    <div class="mb-3">
+      <h5>Tổng tiền cần thanh toán:</h5>
+      <h4 th:text="'$' + ${total}"></h4>
+    </div>
+    <hr>
+
+    <!-- Form gửi yêu cầu thanh toán tới PayOS -->
+    <form id="paymentForm" th:action="@{/create-payment-link}" method="post">
+      <div class="mb-3">
+        <label for="customerName" class="form-label">Tên người nhận:</label>
+        <input type="text" id="customerName" name="customerName" class="form-control" required>
+      </div>
+      <div class="mb-3">
+        <label for="phone" class="form-label">Số điện thoại:</label>
+        <input type="tel" id="phone" name="phone" class="form-control" required>
+      </div>
+      <div class="mb-3">
+        <label for="address" class="form-label">Địa chỉ:</label>
+        <input type="text" id="address" name="address" class="form-control" required>
+      </div>
+      <div class="mb-3">
+        <label for="note" class="form-label">Ghi chú:</label>
+        <textarea id="note" name="note" class="form-control"></textarea>
+      </div>
+      <div th:each="item : ${cartItems}">
+        <input type="hidden" name="productIds" th:value="${item.product.id}" />
+        <input type="hidden" name="quantities" th:value="${item.quantity}" />
+      </div>
+      <button type="submit" class="btn btn-primary submit-btn">Tạo Link thanh toán</button>
+    </form>
+  </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+<script>
+  document.getElementById("paymentForm").addEventListener("submit", async function (event) {
+    event.preventDefault(); // Ngăn form gửi và reload trang
+
+    // Lấy giá trị từ các trường input
+    const customerName = document.getElementById("customerName").value.trim();
+    const phone = document.getElementById("phone").value.trim();
+    const address = document.getElementById("address").value.trim();
+    const note = document.getElementById("note").value.trim();
+
+    // Kiểm tra các trường đầu vào
+    if (!customerName) {
+        alert("Vui lòng nhập tên người nhận!");
+        return;
+    }
+
+    if (!phone) {
+        alert("Vui lòng nhập số điện thoại!");
+        return;
+    }
+
+    if (!address) {
+        alert("Vui lòng nhập địa chỉ!");
+        return;
+    }
+
+    // Kiểm tra giỏ hàng không trống
+    const cartItems = document.querySelectorAll("input[name='productIds']").length;
+    if (cartItems === 0) {
+        alert("Giỏ hàng của bạn đang trống!");
+        return;
+    }
+
+    // Chuẩn bị dữ liệu gửi tới backend
+    const formData = {
+        customerName: customerName,
+        phone: phone,
+        address: address,
+        note: note,
+        cartItems: [] // Tùy chỉnh để truyền thông tin giỏ hàng
+    };
+
+    // Lấy thông tin từng sản phẩm trong giỏ hàng
+    document.querySelectorAll("input[name='productIds']").forEach((input, index) => {
+        const productId = input.value;
+        const quantity = document.querySelectorAll("input[name='quantities']")[index].value;
+
+        formData.cartItems.push({
+            productId: productId,
+            quantity: quantity
+        });
+    });
+
+    try {
+        // Gửi yêu cầu tạo link thanh toán tới backend
+        const response = await fetch("/api/payment/create", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(formData)
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            if (data.paymentUrl) {
+                // Chuyển hướng người dùng đến URL thanh toán
+                window.location.href = data.paymentUrl;
+            } else {
+                alert("Không nhận được URL thanh toán. Vui lòng thử lại.");
+            }
+        } else {
+            alert("Có lỗi xảy ra khi tạo thanh toán. Vui lòng thử lại.");
+        }
+    } catch (error) {
+        console.error("Lỗi:", error);
+        alert("Đã có lỗi xảy ra. Vui lòng thử lại sau.");
+    }
+});
+</script>
+</html>
